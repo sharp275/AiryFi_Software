@@ -24,18 +24,12 @@ Adafruit_BME280 bme; // I2C
 Arduino_GFX *gfx = create_default_Arduino_GFX();
 #else /* !defined(DISPLAY_DEV_KIT) */
 
-//Arduino_DataBus *bus = create_default_Arduino_DataBus();
-
 Arduino_DataBus *bus = new Arduino_ESP8266SPI(2 /* DC */, 15 /* CS */);
 Arduino_GFX *gfx = new Arduino_ST7789(bus, 16 /* RST */, 0 /* rotation */, true /* IPS */,135 /* width */, 240 /* height */,53 /* col offset 1 */, 40 /* row offset 1 */,53 /* col offset 2 */, 40 /* row offset 2 */);
 #endif /* !defined(DISPLAY_DEV_KIT) */
 /*******************************************************************************
  * End of Arduino_GFX setting
  ******************************************************************************/
-int analogInPin  = A0;    // Analog input pin
-int sensorValue;          // Analog Output of Sensor
-float calibration = 0.25; // Check Battery voltage using multimeter & add/subtract the value
-int bat_percentage;
 
 void setup(void)
 {
@@ -50,32 +44,29 @@ void setup(void)
   pmsaSer.println("  PMSA003 dust sensor");
 
     gfx->begin();
+    gfx->setRotation(2);
     gfx->fillScreen(BLACK);
 
 #ifdef TFT_BL
     pinMode(TFT_BL, OUTPUT);
     digitalWrite(TFT_BL, HIGH);
 #endif
-
-    //gfx->setCursor(10, 10);
-    //gfx->setTextColor(RED);
-    //gfx->println("Hello World!");
     
     gfx->setCursor(5, 50);
     gfx->setTextColor(YELLOW);
     gfx->setTextSize(2);
-    gfx->println("Connect PMS");
+    gfx->println("Welcome");
   
     gfx->setCursor(2, 90);
     gfx->setTextColor(YELLOW);
     gfx->setTextSize(2);
-    gfx->println("Jumpire Wire");
+    gfx->println("to");
   
     gfx->setCursor(2, 130);
     gfx->setTextColor(YELLOW);
     gfx->setTextSize(2);
-    gfx->println("To start");
-    delay(2000); // 2 seconds
+    gfx->println("AiryFi");
+    delay(5000); // 5 seconds
 }
 
 void loop()
@@ -84,15 +75,12 @@ void loop()
   {
     pmsaSer.print("PM 1.0 (ug/m3): ");
     pmsaSer.println(data.PM_AE_UG_1_0);
-    //swSer.println(data.PM_AE_UG_1_0);
 
     pmsaSer.print("PM 2.5 (ug/m3): ");
     pmsaSer.println(data.PM_AE_UG_2_5);
-    //swSer.println(data.PM_AE_UG_2_5);
 
     pmsaSer.print("PM 10.0 (ug/m3): ");
     pmsaSer.println(data.PM_AE_UG_10_0);
-    //swSer.println(data.PM_AE_UG_1_0);
     pmsaSer.println();
 
 
@@ -105,14 +93,12 @@ void loop()
 
 
     gfx->setTextWrap(false);
-    //tft.fillScreen(ST77XX_YELLOW);
     gfx->setCursor(5, 40);
     gfx->setTextColor(RED);
     gfx->setTextSize(3);
     gfx->println("Monitor");
 
     gfx->setTextWrap(false);
-    //tft.fillScreen(ST77XX_YELLOW);
     gfx->setCursor(5, 70);
     gfx->setTextColor(YELLOW);
     gfx->setTextSize(3);
@@ -151,7 +137,7 @@ void loop()
     gfx->setCursor(5, 60);
     gfx->setTextColor(YELLOW);
     gfx->setTextSize(2);
-    gfx->println("T=" + String(bme.readTemperature()));
+    gfx->println("T=" + String((bme.readTemperature())*9/5+32));
   
   
     gfx->setCursor(5, 90);
@@ -171,43 +157,6 @@ void loop()
     gfx->setTextSize(2);
     gfx->println("Alt=" + String(bme.readAltitude(SEALEVELPRESSURE_HPA)));
     delay(5000);
-  }  
-    ////////////////////////////////////////////////////////////////////
-
-  sensorValue = analogRead(analogInPin);
-  delay(10);
-  float voltage = (((sensorValue * 4.2) / 1024.0) - calibration); //multiply by two as voltage divider network is 100K & 100K Resistor
-   // float voltage = (((sensorValue * 3.3) / 1024) + calibration) ; //Caliberation for output voltage
-
- if (voltage >= 2.8){
-
-    gfx->setTextWrap(true);
-    gfx->setRotation(false);
-    gfx->fillScreen(BLACK);
-    gfx->setCursor(0, 10);
-    gfx->setTextColor(RED);
-    gfx->setTextSize(3);
-    gfx->println("BatteryVoltage");
-
-    
-    gfx->setTextWrap(false);
-    gfx->setCursor(5, 60);
-    gfx->setTextColor(RED);
-    gfx->setTextSize(3);
-    gfx->println(voltage);
-  delay(2000);
-}
-
-else if (voltage <= 2.8){
-   Serial.print("Battery Low! Please Plugin Charger");
-    gfx->setTextWrap(true);
-    gfx->setRotation(true);
-    gfx->fillScreen(BLACK);
-    gfx->setCursor(0, 25);
-    gfx->setTextColor(RED);
-    gfx->setTextSize(3);
-    gfx->println("Battery Low! Please Charge");
-    delay(2000);
   
-}
+  } 
 }
